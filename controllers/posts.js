@@ -14,8 +14,8 @@ export const getPosts=async(req,res)=>{
 export const createPosts=async(req,res)=>{
   const post=req.body;
   console.log(req.body);
-  const newPost=new postMessage(post);
-  
+  const newPost=new postMessage({...post,creator:req.userId,createdAt:new Date()});
+
   try{
     await newPost.save();
     res.status(200).json(newPost);
@@ -57,12 +57,19 @@ export const deletePost =async(req,res)=>{
 
 export const likePost=async(req,res)=>{
   const id= req.params.id;
+  if(!req.userId) res.status(400).json({message:'unathorized'});
   if(!mongoose.Types.ObjectId.isValid(id))
-  return res.status(404).send('given id is not valid');
+    res.status(404).send('given id is not valid');
 
   try {
     const post =await postMessage.findById(id);
-    const likePost=await postMessage.findByIdAndUpdate(id,{likeCount:post.likeCount+1},{new:true});
+    const index = post.likes.findIndex((id)=>id===String(req.userId));
+    if(index===-1){
+      post.likes.push(req.userId);
+    } else {
+      post.likes=post.likes.filter((id)=>id!=String(req.userId));
+    }
+    const likePost=await postMessage.findByIdAndUpdate(id,post,{new:true});
     res.status(200).json(likePost);
   } catch (error) {
     console.log(error);

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import './db/conn.js';
 import PostRoutes from '../routes/posts.js';
+import userRoutes from '../routes/users.js';
 import 'dotenv/config';
 
 const app=express();
@@ -16,10 +17,11 @@ app.use(express.urlencoded({extended:false,limit:'50mb'}));
 const PORT=process.env.PORT||5000;
 
 app.use('/posts',PostRoutes);
+app.use('/users',userRoutes);
 
-app.get('/',(req,res)=>{
-  res.send("okay");
-})
+// app.get('/',(req,res)=>{
+//   res.send("okay");
+// })
 
 app.listen(PORT,()=>{
   console.log(`server running on port : ${PORT}`);
