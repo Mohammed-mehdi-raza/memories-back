@@ -13,7 +13,6 @@ export const getPosts=async(req,res)=>{
 
 export const createPosts=async(req,res)=>{
   const post=req.body;
-  console.log(req.body);
   const newPost=new postMessage({...post,creator:req.userId,createdAt:new Date()});
 
   try{
@@ -34,8 +33,6 @@ export const updatePost=async(req,res)=>{
 
   try {
     const updatePost =await postMessage.findByIdAndUpdate(_id,post,{new:true});
-    console.log(post);
-    //res.headers.add('Access-Control-Allow-Origin','*');
     res.status(200).json(updatePost);
   } catch (error) {
     console.log(error);
