@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import 'dotenv/config';
-const URI=process.env.MONGO_URI||mongodb+srv://dbUser:dbUserPassword@cluster0.kcwoc.mongodb.net/memories?retryWrites=true&w=majority;
+const URI=process.env.MONGO_URI;
 
 mongoose.connect(URI,{
   useNewUrlParser:true,
