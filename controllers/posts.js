@@ -2,11 +2,40 @@ import mongoose from 'mongoose';
 import postMessage from '../models/postMessages.js';
 
 export const getPosts=async(req,res)=>{
+
+  const {page}=req.query;
+
   try{
-    const message=await postMessage.find();
-    res.status(201).json(message);
+    const LIMIT=6;
+    const startIndex=(Number(page)-1)*LIMIT;
+    const total=await postMessage.countDocuments({});
+    const posts=await postMessage.find().sort({_id:-1}).limit(LIMIT).skip(startIndex);
+    res.status(201).json({data:posts,currentPage:page,numberOfPages:Math.ceil(total/LIMIT)});
   }
   catch(error){
+    res.status(409).json({message:error.message});
+  }
+}
+
+export const getPost=async(req,res)=>{
+  const id = req.params.id;
+  try{
+    const post = await postMessage.findById(id);
+    res.status(200).json(post);
+  }catch(e){
+    res.status(202).json({message:e.message});
+  }
+}
+
+export const getPostsBySearch=async(req,res)=>{
+
+  const {searchQuery,tags}=req.query;
+
+  try {
+    const title=new RegExp(searchQuery,"i");
+    const posts=await postMessage.find({ $or: [ {title} ,{tags: {$in:tags.split(",")}} ] });
+    res.status(200).json({data:posts});
+  } catch (error) {
     res.status(409).json({message:error.message});
   }
 }
@@ -16,6 +45,7 @@ export const createPosts=async(req,res)=>{
   const newPost=new postMessage({...post,creator:req.userId,createdAt:new Date()});
 
   try{
+    console.log(newPost);
     await newPost.save();
     res.status(200).json(newPost);
   }
@@ -27,7 +57,6 @@ export const createPosts=async(req,res)=>{
 export const updatePost=async(req,res)=>{
   const _id=req.params.id;
   const post=req.body;
-
   if(!mongoose.Types.ObjectId.isValid(_id))
     return res.status(404).send('given id is not valid');
 
